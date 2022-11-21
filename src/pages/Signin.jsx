@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserAuth } from '../context/AuthContext';
 import { Modal, message, Button, Alert } from 'antd';
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.min.css';
 import { async } from '@firebase/util';
 
 
@@ -56,9 +56,9 @@ const Signin = () => {
   
 
   return (
-    <div className='max-w-[700px] mx-auto my-16 p-4'>
+    <div className='max-w-[700px] h-screen mx-auto my-16 p-4 dark:bg-inherit'>
       <div>
-        <h1 className='text-2xl font-bold py-2'>Sign in to your account</h1>
+        <h1 className='text-2xl font-bold py-2 dark:text-gray-200'>Sign in to your account</h1>
       </div>
       <form >
         <div className='flex flex-col py-2'>
@@ -66,7 +66,7 @@ const Signin = () => {
                 Email
             </label>
             <input
-                className='shadow appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+                className='shadow appearance-none border rounded w-full py-3 px-3  dark:bg-inherit leading-tight focus:outline-none focus:shadow-outline'
                 type='email'
                 placeholder='Email'
                 value={email}
@@ -78,7 +78,7 @@ const Signin = () => {
                 Password
             </label>
             <input
-                className='shadow appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+                className='shadow appearance-none border rounded w-full py-3 px-3  dark:bg-inherit leading-tight focus:outline-none focus:shadow-outline'
                 type='password'
                 placeholder='Password'
                 value={password}
@@ -117,7 +117,8 @@ const Signin = () => {
         }
       
       </form>
-    </div>
+    </div> 
+    
   );
 };
 

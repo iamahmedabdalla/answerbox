@@ -15,7 +15,7 @@ const UserContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState({});
 
-  const createUser = async (name, email, password) => {
+  const createUser = async (name, email, password, isMobile) => {
      try {
         const { user } = await createUserWithEmailAndPassword(
           auth,
@@ -32,6 +32,7 @@ export const AuthContextProvider = ({ children }) => {
           email: user.email,
           name: user.displayName,
           dateCreated: user.metadata.creationTime,
+          DeviceType: isMobile ? 'Mobile' : 'Desktop',
         });
         setUser(user);
       } catch (error) {

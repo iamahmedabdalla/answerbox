@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
-import { Slider, Skeleton, message, Drawer, Tag, Button, Alert } from "antd";
-import { Col, DatePicker, Form, Input, Row, Select, Space } from "antd";
-import "antd/dist/antd.css";
+import { Slider, Skeleton, message, Drawer, Tag, Button, Alert, Segmented, Dropdown } from "antd";
+import { Menu, DatePicker, Form, Input, Row, Select, Space } from "antd";
+import "antd/dist/antd.min.css";
 import { MoreOutlined } from "@ant-design/icons";
 import "../index.css";
 import {
@@ -21,6 +21,7 @@ import { data } from "autoprefixer";
 
 const Answers = () => {
   const [questions, setQuestions] = useState("");
+  const [searchQuestions, setSearchQuestions] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState(false);
@@ -36,7 +37,13 @@ const Answers = () => {
   useEffect(() => {
     const getQuestions = async () => {
       const data = await getDocs(collection(db, "questions"));
-      setQuestions(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      // sort questions by confidence
+      const sortedData = data.docs.sort((a, b) => {
+        return b.data().confidence - a.data().confidence;
+      }
+      );
+      setQuestions(sortedData.map((doc) => ({ ...doc.data(), id: doc.id })));
+
     };
     getQuestions();
   }, []);
@@ -49,6 +56,8 @@ const Answers = () => {
       return true;
     }
   };
+
+ 
 
   const handleDelete = async (id) => {
     try {
@@ -111,6 +120,9 @@ const Answers = () => {
     }
   };
 
+
+
+
   // handle disapprove answer
   const handleDisapprove = async (id) => {
     try {
@@ -141,34 +153,58 @@ const Answers = () => {
       message.error("Answer not disapproved");
     }
   };
+  const [width, setWidth] = useState(window.innerWidth);
+
+function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+}
+useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+        window.removeEventListener('resize', handleWindowSizeChange);
+    }
+}, []);
+
+const isMobile = width <= 768;
 
   return (
-    <div className="">
+    <div className=" p-4
+    dark:bg-gray-900 dark:text-gray-100
+    ">
       <div className="">
+        {width <= 768 ? (
+          <p className="text-2xl font-bold">is mobile</p>
+        ) : (
+          <p className="text-2xl font-bold">is not mobile</p>
+        )}
+        <div className="flex justify-start items-center">
         <Link to="/account">
           <button className="border px-6 py-2 my-4">Ask Question</button>
         </Link>
         {/* <input type="text" placeholder="Search" className="border p-2 my-2" style={{width: '799px'}} onChange={(e) => setSearch(e.target.value)} />
-        <button className="border px-6 py-2 my-4" onClick={searchQuestions}>Search</button> */}
-        <select
-          onChange={(e) => setSubject(e.target.value)}
-          className="border px-6 py-2 my-4"
-        >
-          <option value="all">All Subjects</option>
-          <option value="Maths">Maths</option>
-          <option value="Information Technology">Information Technology</option>
-          <option value="Science">Science</option>
-          <option value="Medical">Medical</option>
-          <option value="Languages">Languages</option>
-          <option value="Information">Information</option>
-          <option value="Law">Law</option>
-          <option value="Other">Other</option>
-        </select>
-        <button onClick={handleFilter} className="border px-6 py-2 my-4">
-          Filter
-        </button>
-        <p className="text-sm">Total Questions: {questions.length}</p>
+        <button className="border px-6 py-2 my-4" onClick={searchQuestions}>Search</button>  */}
+        
+        <form onSubmit={handleFilter}>
+          <select 
+          className='border py-2 w-28 dark:bg-inherit'
+          onChange={(e) => setSubject(e.target.value)}>
+            <option value="all">All (Filter by subject)</option>
+            <option value='Maths'>Maths</option>
+              <option value='Information Technology'>Information Technology</option>
+              <option value='Science'>Science</option>
+              <option value='Medical'>Medical</option>
+              <option value='Languages'>Languages</option>
+              <option value='Information'>Information</option>
+              <option value='Law'>Law</option>
+              <option value='Other'>Other</option>
+          </select>
+          <button className="border px-6 py-2">Filter</button>
+        </form>
+        </div>
 
+        
+
+       
         {questions.length === 0 ? (
           <div className="">
             <h1 className="text-center">No questions yet</h1>
@@ -178,30 +214,15 @@ const Answers = () => {
         )}
         {questions ? (
           questions.map((question) => (
-            <div className="border p-4 my-4" key={question.id}>
-              <h3 className="text-xl font-bold">
+            <div className="border p-4 my-4
+            dark:bg-gray-900 dark:text-gray-100
+            hover:shadow-lg dark:hover:bg-gray-800
+            " key={question.id}>
+              <h3 className="text-xl font-bold dark:text-gray-100 ">
                 {question && question.question
                   ? question.question
                   : "No question"}
-                {user?.uid === question.createdByUid ? (
-                  <div
-                    className="flex justify-between"
-                    style={{
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Button
-                      type="primary"
-                      danger
-                      ghost
-                      onClick={() => handleDelete(question.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                ) : (
-                  ""
-                )}
+                
               </h3>
               <p className="text-lg">
                 {checkQuestion(question) ? question.answer : "No answer yet"}
@@ -215,13 +236,7 @@ const Answers = () => {
               ) : (
                 ""
               )}
-              <p className="text-sm">created by {question.createdBy}</p>
-              <p className="text-sm">
-                created at{" "}
-                {question.createdAt
-                  ? question.createdAt.toDate().toString()
-                  : "loading"}
-              </p>
+              
               <p className="text-sm">
                 {" "}
                 Confidence Score: {question.confidence}
@@ -246,7 +261,7 @@ const Answers = () => {
                   danger
                   ghost
                 >
-                  Reject Answer
+                  Disapprove Answer
                 </Button>
                 <Button type="primary" ghost>
                   <a
@@ -274,3 +289,5 @@ const Answers = () => {
 };
 
 export default Answers;
+
+
